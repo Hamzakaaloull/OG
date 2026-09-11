@@ -39,7 +39,7 @@
     return `
       <a href="#" class="download-btn" data-locked="true">
         <i class="bi bi-download"></i>
-        فك القفل و حمّل 🔓
+       Unlock to Download 
       </a>
     `;
   }
