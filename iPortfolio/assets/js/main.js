@@ -1,26 +1,235 @@
-/**
-* Template Name: iPortfolio
-* Template URL: https://bootstrapmade.com/iportfolio-bootstrap-portfolio-websites-template/
-* Updated: Jun 29 2024 with Bootstrap v5.3.3
-* Author: BootstrapMade.com
-* License: https://bootstrapmade.com/license/
-*/
-
 (function() {
   "use strict";
-
+ 
+  /**
+   * CPA Locker (AdBlueMedia) helpers
+   */
+  function checkLockerUnlock() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('unlocked') === '1') {
+      localStorage.setItem('cpa_unlocked', 'true');
+      // نمسحو الباراميتر من الرابط باش ما يبقاش ظاهر
+      params.delete('unlocked');
+      const cleanUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+      window.history.replaceState({}, '', cleanUrl);
+    }
+  }
+ 
+  function isUnlocked() {
+    return localStorage.getItem('cpa_unlocked') === 'true';
+  }
+ 
+  function openLocker() {
+    if (typeof _uj === 'function') {
+      _uj();
+    } else {
+      console.warn('AdBlueMedia locker script ma tحملش بعد. عاود جرب من بعد شوية.');
+    }
+  }
+ 
+  function renderDownloadButton(project) {
+    if (isUnlocked()) {
+      return `
+        <a href="${project.downloadUrl}" target="_blank" class="download-btn">
+          <i class="bi bi-download"></i>
+          Click Me 😏
+        </a>
+      `;
+    }
+    return `
+      <a href="#" class="download-btn" data-locked="true">
+        <i class="bi bi-download"></i>
+        فك القفل و حمّل 🔓
+      </a>
+    `;
+  }
+ 
+  const portfolioProjects = [
+    {
+      id: 1,
+      title: 'Professional PSD Thumbnail Template',
+      shortTitle: 'Thumbnail Template',
+      shortDescription: 'Free Thumbnail Template pack',
+      category: 'PSD Templates',
+      client: 'PSD / Photoshop / Photopea',
+      date: '01 March, 2026',
+      image: 'assets/img/portfolio/product-3.jpg',
+      gallery: [
+        
+        'assets/img/portfolio/product-2.jpg',
+        'assets/img/portfolio/thmbnil1.jpg',
+        'assets/img/portfolio/product-3.jpg'
+      ],
+      downloadUrl: 'https://drive.google.com/file/d/18VGWNRGr9jJ1PZoDUIh_SqNLtNHYGLsL/view?usp=sharing',
+      description: 'Download this high-quality PSD thumbnail template and customize it easily in Adobe Photoshop. The template is fully editable, allowing you to change the text, images, colors, and other design elements according to your needs. This PSD template is suitable for YouTube thumbnails, social media content, promotional designs, and other creative projects.'
+    },
+    /* {
+      id: 2,
+      title: 'Creative Social Media Branding Kit',
+      shortTitle: 'Branding Kit',
+      shortDescription: 'Editable branding template pack',
+      category: 'PSD Templates',
+      client: 'PSD / Photoshop / Photopea',
+      date: '05 March, 2026',
+      image: 'assets/img/portfolio/branding-3.jpg',
+      gallery: [
+        'assets/img/portfolio/branding-3.jpg',
+        'assets/img/portfolio/branding-2.jpg',
+        'assets/img/portfolio/books-1.jpg'
+      ],
+      downloadUrl: 'vvs',
+      description: 'This branding package gives you a polished range of editable PSD layouts for online branding, digital promos, and modern social media graphics. You can quickly replace text, photos, and colors to match your own identity and campaign style.'
+    } */
+  ];
+ 
+  function slugify(value) {
+    return value
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+ 
+  function renderPortfolioFilters() {
+    const filterList = document.querySelector('#portfolio-filters');
+    if (!filterList) return;
+ 
+    const categories = [...new Set(portfolioProjects.map(project => project.category))];
+ 
+    filterList.innerHTML = `
+      <li><button type="button" class="filter-active" data-filter="all">All</button></li>
+      ${categories.map(category => `
+        <li><button type="button" data-filter="${slugify(category)}">${category}</button></li>
+      `).join('')}
+    `;
+ 
+    filterList.querySelectorAll('button').forEach(button => {
+      button.addEventListener('click', function() {
+        filterList.querySelectorAll('button').forEach(item => item.classList.remove('filter-active'));
+        this.classList.add('filter-active');
+ 
+        const selectedFilter = this.getAttribute('data-filter');
+        document.querySelectorAll('.portfolio-card').forEach(card => {
+          const matches = selectedFilter === 'all' || card.getAttribute('data-category') === this.textContent.trim();
+          card.style.display = matches ? '' : 'none';
+        });
+      });
+    });
+  }
+ 
+  function renderPortfolioProjects() {
+    const grid = document.querySelector('#portfolio-grid');
+    if (!grid) return;
+ 
+    grid.innerHTML = portfolioProjects.map(project => `
+      <div class="col-lg-6 col-md-6 portfolio-item portfolio-card" data-category="${project.category}">
+        <div class="portfolio-content h-100">
+          <img src="${project.image}" class="img-fluid" alt="${project.title}">
+          <div class="portfolio-info">
+            <h4>${project.shortTitle}</h4>
+            <p>${project.shortDescription}</p>
+            <a href="${project.image}" title="${project.title}" data-gallery="portfolio-gallery-${project.id}" class="glightbox preview-link"><i class="bi bi-zoom-in"></i></a>
+            <a href="portfolio-details.html?id=${project.id}" title="More Details" class="details-link"><i class="bi bi-link-45deg"></i></a>
+          </div>
+        </div>
+      </div>
+    `).join('');
+ 
+    if (window.GLightbox) {
+      if (window.portfolioLightbox) {
+        window.portfolioLightbox.destroy();
+      }
+      window.portfolioLightbox = GLightbox({ selector: '.glightbox' });
+    }
+ 
+    if (window.AOS) {
+      window.AOS.refreshHard();
+    }
+  }
+ 
+  function renderProjectDetails() {
+    const detailContainer = document.querySelector('#project-details-content');
+    if (!detailContainer) return;
+ 
+    const params = new URLSearchParams(window.location.search);
+    const projectId = Number(params.get('id')) || portfolioProjects[0].id;
+    const project = portfolioProjects.find(item => item.id === projectId) || portfolioProjects[0];
+ 
+    detailContainer.innerHTML = `
+      <div class="row gy-4">
+        <div class="col-lg-8">
+          <div class="portfolio-details-slider swiper init-swiper">
+            <script type="application/json" class="swiper-config">
+              {
+                "loop": true,
+                "speed": 600,
+                "autoplay": {
+                  "delay": 5000
+                },
+                "slidesPerView": "auto",
+                "pagination": {
+                  "el": ".swiper-pagination",
+                  "type": "bullets",
+                  "clickable": true
+                }
+              }
+            </script>
+ 
+            <div class="swiper-wrapper align-items-center">
+              ${project.gallery.map(image => `
+                <div class="swiper-slide">
+                  <img src="${image}" alt="${project.title}">
+                </div>
+              `).join('')}
+            </div>
+            <div class="swiper-pagination"></div>
+          </div>
+        </div>
+ 
+        <div class="col-lg-4">
+          <div class="portfolio-info" data-aos="fade-up" data-aos-delay="200">
+            <h3>Project information</h3>
+            <ul>
+              <li><strong>Category</strong>: ${project.category}</li>
+              <li><strong>Client</strong>: ${project.client}</li>
+              <li><strong>Project date</strong>: ${project.date}</li>
+              <li class="download-item">
+                <strong>Download</strong>:
+                ${renderDownloadButton(project)}
+              </li>
+            </ul>
+          </div>
+ 
+          <div class="portfolio-description" data-aos="fade-up" data-aos-delay="300">
+            <h2>${project.title}</h2>
+            <p>${project.description}</p>
+          </div>
+        </div>
+      </div>
+    `;
+ 
+    // نربطو الكليك بزر التحميل المقفول (إلا كان موجود) - بلا inline onclick
+    const lockedBtn = detailContainer.querySelector('.download-btn[data-locked="true"]');
+    if (lockedBtn) {
+      lockedBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        openLocker();
+      });
+    }
+  }
+ 
   /**
    * Header toggle
    */
   const headerToggleBtn = document.querySelector('.header-toggle');
-
+ 
   function headerToggle() {
     document.querySelector('#header').classList.toggle('header-show');
     headerToggleBtn.classList.toggle('bi-list');
     headerToggleBtn.classList.toggle('bi-x');
   }
   headerToggleBtn.addEventListener('click', headerToggle);
-
+ 
   /**
    * Hide mobile nav on same-page/hash links
    */
@@ -30,9 +239,9 @@
         headerToggle();
       }
     });
-
+ 
   });
-
+ 
   /**
    * Toggle mobile nav dropdowns
    */
@@ -44,7 +253,7 @@
       e.stopImmediatePropagation();
     });
   });
-
+ 
   /**
    * Preloader
    */
@@ -54,12 +263,12 @@
       preloader.remove();
     });
   }
-
+ 
   /**
    * Scroll top button
    */
   let scrollTop = document.querySelector('.scroll-top');
-
+ 
   function toggleScrollTop() {
     if (scrollTop) {
       window.scrollY > 100 ? scrollTop.classList.add('active') : scrollTop.classList.remove('active');
@@ -72,10 +281,10 @@
       behavior: 'smooth'
     });
   });
-
+ 
   window.addEventListener('load', toggleScrollTop);
   document.addEventListener('scroll', toggleScrollTop);
-
+ 
   /**
    * Animation on scroll function and init
    */
@@ -88,7 +297,7 @@
     });
   }
   window.addEventListener('load', aosInit);
-
+ 
   /**
    * Init typed.js
    */
@@ -104,12 +313,12 @@
       backDelay: 2000
     });
   }
-
+ 
   /**
    * Initiate Pure Counter
    */
   new PureCounter();
-
+ 
   /**
    * Animate the skills items on reveal
    */
@@ -126,47 +335,18 @@
       }
     });
   });
-
+ 
   /**
    * Initiate glightbox
    */
   const glightbox = GLightbox({
     selector: '.glightbox'
   });
-
-  /**
-   * Init isotope layout and filters
-   */
-  document.querySelectorAll('.isotope-layout').forEach(function(isotopeItem) {
-    let layout = isotopeItem.getAttribute('data-layout') ?? 'masonry';
-    let filter = isotopeItem.getAttribute('data-default-filter') ?? '*';
-    let sort = isotopeItem.getAttribute('data-sort') ?? 'original-order';
-
-    let initIsotope;
-    imagesLoaded(isotopeItem.querySelector('.isotope-container'), function() {
-      initIsotope = new Isotope(isotopeItem.querySelector('.isotope-container'), {
-        itemSelector: '.isotope-item',
-        layoutMode: layout,
-        filter: filter,
-        sortBy: sort
-      });
-    });
-
-    isotopeItem.querySelectorAll('.isotope-filters li').forEach(function(filters) {
-      filters.addEventListener('click', function() {
-        isotopeItem.querySelector('.isotope-filters .filter-active').classList.remove('filter-active');
-        this.classList.add('filter-active');
-        initIsotope.arrange({
-          filter: this.getAttribute('data-filter')
-        });
-        if (typeof aosInit === 'function') {
-          aosInit();
-        }
-      }, false);
-    });
-
-  });
-
+ 
+  checkLockerUnlock();
+  renderPortfolioProjects();
+  renderProjectDetails();
+ 
   /**
    * Init swiper sliders
    */
@@ -175,7 +355,7 @@
       let config = JSON.parse(
         swiperElement.querySelector(".swiper-config").innerHTML.trim()
       );
-
+ 
       if (swiperElement.classList.contains("swiper-tab")) {
         initSwiperWithCustomPagination(swiperElement, config);
       } else {
@@ -183,9 +363,9 @@
       }
     });
   }
-
+ 
   window.addEventListener("load", initSwiper);
-
+ 
   /**
    * Correct scrolling position upon page load for URLs containing hash links.
    */
@@ -203,12 +383,12 @@
       }
     }
   });
-
+ 
   /**
    * Navmenu Scrollspy
    */
   let navmenulinks = document.querySelectorAll('.navmenu a');
-
+ 
   function navmenuScrollspy() {
     navmenulinks.forEach(navmenulink => {
       if (!navmenulink.hash) return;
@@ -225,5 +405,5 @@
   }
   window.addEventListener('load', navmenuScrollspy);
   document.addEventListener('scroll', navmenuScrollspy);
-
+ 
 })();
