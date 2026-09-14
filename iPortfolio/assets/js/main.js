@@ -95,7 +95,7 @@
         'assets/img/portfolio/project2/Paypal 1.png',
         'assets/img/portfolio/project2/Paypal 2.png'
       ],
-      downloadUrl: 'https://drive.google.com/file/d/1tE2Q8BzKzY7jyIY5awA2KcV9H9F9Vw9i/view?usp=sharing',
+      downloadUrl: 'https://mega.nz/file/KvAnzaoa#eLiJNvHATBcolAJ4QIVDVTzlG2KqESQ3rUUBLlkG0yg',
       description: 'The Ultimate Design Assets Pack is a versatile collection of creative resources designed to speed up your workflow and give your projects a more professional look.From realistic textures and paper elements to sparks, lasers, lens flares, backgrounds, UI graphics, and more, this pack gives you a wide variety of visual resources that can be used across graphic design, thumbnails, social media content, video editing, promotional designs, and creative projects. Whether you are creating a YouTube thumbnail, editing a video, designing social media content, or building a professional graphic composition, these assets can help you add depth, atmosphere, detail, and visual impact to your work.',
       features: [
         'Material Textures',
