@@ -27,21 +27,27 @@
     }
   }
  
-  function renderDownloadButton(project) {
-    if (isUnlocked()) {
-      return `
-        <a href="${project.downloadUrl}" target="_blank" class="download-btn">
-          <i class="bi bi-download"></i>
-          Click Me 😏
-        </a>
-      `;
-    }
+  function renderDownloadButton(project, context = 'detail') {
+    const unlocked = isUnlocked();
+    const href = unlocked ? project.downloadUrl : '#';
+    const target = unlocked ? ' target="_blank" rel="noopener noreferrer"' : '';
+    const btnClass = context === 'card' ? 'project-action-btn download-btn download-btn--card' : 'download-btn';
+
     return `
-      <a href="#" class="download-btn" data-locked="true">
+      <a href="${href}" class="${btnClass}" data-locked="${unlocked ? 'false' : 'true'}"${target}>
         <i class="bi bi-download"></i>
-       Download 
+        <span>Download</span>
       </a>
     `;
+  }
+
+  function bindLockedDownloadButtons(root = document) {
+    root.querySelectorAll('.download-btn[data-locked="true"]').forEach(button => {
+      button.addEventListener('click', function(event) {
+        event.preventDefault();
+        openLocker();
+      });
+    });
   }
  
   const portfolioProjects = [
@@ -55,31 +61,50 @@
       date: '01 March, 2026',
       image: 'assets/img/portfolio/product-3.jpg',
       gallery: [
-        
         'assets/img/portfolio/product-2.jpg',
         'assets/img/portfolio/thmbnil1.jpg',
         'assets/img/portfolio/product-3.jpg'
       ],
       downloadUrl: 'https://drive.google.com/file/d/18VGWNRGr9jJ1PZoDUIh_SqNLtNHYGLsL/view?usp=sharing',
-      description: 'Download this high-quality PSD thumbnail template and customize it easily in Adobe Photoshop. The template is fully editable, allowing you to change the text, images, colors, and other design elements according to your needs. This PSD template is suitable for YouTube thumbnails, social media content, promotional designs, and other creative projects.'
+      description: 'Download this high-quality PSD thumbnail template and customize it easily in Adobe Photoshop. The template is fully editable, allowing you to change the text, images, colors, and other design elements according to your needs. This PSD template is suitable for YouTube thumbnails, social media content, promotional designs, and other creative projects.',
+      features: [
+        'Editable PSD',
+        'Customizable text',
+        'Customizable colors',
+        'Photoshop compatible',
+        'Photopea compatible'
+      ]
     },
-    /* {
+    {
       id: 2,
-      title: 'Creative Social Media Branding Kit',
-      shortTitle: 'Branding Kit',
-      shortDescription: 'Editable branding template pack',
-      category: 'PSD Templates',
+      title: 'A massive collection of creative assets for designers',
+      shortTitle: 'Ultimate Design Assets Pack',
+      shortDescription: 'Design Assets',
+      category: 'Design Assets',
       client: 'PSD / Photoshop / Photopea',
-      date: '05 March, 2026',
-      image: 'assets/img/portfolio/branding-3.jpg',
+      date: '14 September, 2026',
+      image: 'assets/img/portfolio/project2/Project2Cover.jpg',
       gallery: [
-        'assets/img/portfolio/branding-3.jpg',
-        'assets/img/portfolio/branding-2.jpg',
-        'assets/img/portfolio/books-1.jpg'
+        'assets/img/portfolio/project2/1.jpg',
+        'assets/img/portfolio/project2/2.jpg',
+        'assets/img/portfolio/project2/3.jpg',
+        'assets/img/portfolio/project2/4.jpg',
+        'assets/img/portfolio/project2/5.png',
+        'assets/img/portfolio/project2/6.png',
+        'assets/img/portfolio/project2/amazon.png',
+        'assets/img/portfolio/project2/Paypal 1.png',
+        'assets/img/portfolio/project2/Paypal 2.png'
       ],
-      downloadUrl: 'vvs',
-      description: 'This branding package gives you a polished range of editable PSD layouts for online branding, digital promos, and modern social media graphics. You can quickly replace text, photos, and colors to match your own identity and campaign style.'
-    } */
+      downloadUrl: 'https://drive.google.com/file/d/1tE2Q8BzKzY7jyIY5awA2KcV9H9F9Vw9i/view?usp=sharing',
+      description: 'The Ultimate Design Assets Pack is a versatile collection of creative resources designed to speed up your workflow and give your projects a more professional look.From realistic textures and paper elements to sparks, lasers, lens flares, backgrounds, UI graphics, and more, this pack gives you a wide variety of visual resources that can be used across graphic design, thumbnails, social media content, video editing, promotional designs, and creative projects. Whether you are creating a YouTube thumbnail, editing a video, designing social media content, or building a professional graphic composition, these assets can help you add depth, atmosphere, detail, and visual impact to your work.',
+      features: [
+        'Material Textures',
+        'Paper Textures & Elements',
+        'Ripped Paper',
+        'Sparks & Particle Effects',
+        'Laser Effects'
+      ]
+    }
   ];
  
   function slugify(value) {
@@ -123,17 +148,29 @@
  
     grid.innerHTML = portfolioProjects.map(project => `
       <div class="col-lg-6 col-md-6 portfolio-item portfolio-card" data-category="${project.category}">
-        <div class="portfolio-content h-100">
-          <img src="${project.image}" class="img-fluid" alt="${project.title}">
-          <div class="portfolio-info">
-            <h4>${project.shortTitle}</h4>
-            <p>${project.shortDescription}</p>
-            <a href="${project.image}" title="${project.title}" data-gallery="portfolio-gallery-${project.id}" class="glightbox preview-link"><i class="bi bi-zoom-in"></i></a>
-            <a href="portfolio-details.html?id=${project.id}" title="More Details" class="details-link"><i class="bi bi-link-45deg"></i></a>
+        <div class="portfolio-card-inner">
+          <div class="portfolio-content h-100">
+            <img src="${project.image}" class="img-fluid" alt="${project.title}">
+            <div class="portfolio-info">
+              <h4>${project.shortTitle}</h4>
+              <p>${project.shortDescription}</p>
+              <a href="${project.image}" title="${project.title}" data-gallery="portfolio-gallery-${project.id}" class="glightbox preview-link"><i class="bi bi-zoom-in"></i></a>
+              <a href="portfolio-details.html?id=${project.id}" title="More Details" class="details-link"><i class="bi bi-link-45deg"></i></a>
+            </div>
+          </div>
+
+          <div class="portfolio-card-actions">
+            <a href="portfolio-details.html?id=${project.id}" class="project-action-btn project-action-btn--secondary">
+              <i class="bi bi-eye"></i>
+              <span>Show Details</span>
+            </a>
+            ${renderDownloadButton(project, 'card')}
           </div>
         </div>
       </div>
     `).join('');
+ 
+    bindLockedDownloadButtons(grid);
  
     if (window.GLightbox) {
       if (window.portfolioLightbox) {
@@ -147,6 +184,47 @@
     }
   }
  
+  function getProjectFeatures(project) {
+    if (Array.isArray(project.features) && project.features.length) {
+      return project.features;
+    }
+
+    const features = [];
+    const description = (project.description || '').toLowerCase();
+    const clientText = (project.client || '').toLowerCase();
+
+    if (description.includes('custom') || description.includes('editable')) {
+      features.push('Editable design');
+    }
+    if (description.includes('color') || description.includes('text')) {
+      features.push('Easy customization');
+    }
+    if (description.includes('photopea')) {
+      features.push('Photopea compatible');
+    }
+    if (description.includes('photoshop')) {
+      features.push('Photoshop compatible');
+    }
+    if (description.includes('social media') || description.includes('branding')) {
+      features.push('Brand-ready layout');
+    }
+    if (description.includes('thumbnail') || description.includes('youtube')) {
+      features.push('Social media ready');
+    }
+    if (description.includes('template')) {
+      features.push('Ready-to-use template');
+    }
+
+    if (!features.length && clientText.includes('photoshop')) {
+      features.push('Photoshop compatible');
+    }
+    if (!features.length && clientText.includes('photopea')) {
+      features.push('Photopea compatible');
+    }
+
+    return [...new Set(features)].slice(0, 6);
+  }
+
   function renderProjectDetails() {
     const detailContainer = document.querySelector('#project-details-content');
     if (!detailContainer) return;
@@ -154,68 +232,127 @@
     const params = new URLSearchParams(window.location.search);
     const projectId = Number(params.get('id')) || portfolioProjects[0].id;
     const project = portfolioProjects.find(item => item.id === projectId) || portfolioProjects[0];
- 
+    const projectFeatures = getProjectFeatures(project);
+    const compatibilityLabel = /photoshop|photopea|figma|canva|illustrator/i.test(project.client || '') ? 'Compatible With' : 'Client';
+
+    document.title = `${project.title} | RYVL`;
+
     detailContainer.innerHTML = `
-      <div class="row gy-4">
-        <div class="col-lg-8">
-          <div class="portfolio-details-slider swiper init-swiper">
-            <script type="application/json" class="swiper-config">
-              {
-                "loop": true,
-                "speed": 600,
-                "autoplay": {
-                  "delay": 5000
-                },
-                "slidesPerView": "auto",
-                "pagination": {
-                  "el": ".swiper-pagination",
-                  "type": "bullets",
-                  "clickable": true
+      <div class="project-detail-page">
+        <nav class="project-breadcrumb" aria-label="Breadcrumb">
+          <a href="index.html">Home</a>
+          <span class="breadcrumb-separator">/</span>
+          <a href="index.html#portfolio">Projects</a>
+          <span class="breadcrumb-separator">/</span>
+          <span>${project.title}</span>
+        </nav>
+
+        <div class="project-showcase">
+          <div class="project-gallery-panel" data-aos="fade-up" data-aos-delay="100">
+            <div class="portfolio-details-slider swiper init-swiper project-swiper">
+              <script type="application/json" class="swiper-config">
+                {
+                  "loop": true,
+                  "speed": 700,
+                  "autoplay": {
+                    "delay": 5000
+                  },
+                  "slidesPerView": 1,
+                  "spaceBetween": 18,
+                  "pagination": {
+                    "el": ".swiper-pagination",
+                    "type": "bullets",
+                    "clickable": true
+                  },
+                  "navigation": {
+                    "nextEl": ".swiper-button-next",
+                    "prevEl": ".swiper-button-prev"
+                  }
                 }
-              }
-            </script>
- 
-            <div class="swiper-wrapper align-items-center">
-              ${project.gallery.map(image => `
-                <div class="swiper-slide">
-                  <img src="${image}" alt="${project.title}">
-                </div>
-              `).join('')}
+              </script>
+
+              <div class="swiper-wrapper">
+                ${project.gallery.map(image => `
+                  <div class="swiper-slide">
+                    <a href="${image}" class="project-lightbox" data-gallery="project-gallery-${project.id}" aria-label="Open preview for ${project.title}">
+                      <img src="${image}" alt="${project.title} preview" loading="eager">
+                    </a>
+                  </div>
+                `).join('')}
+              </div>
+
+              <div class="swiper-button-next"><i class="bi bi-chevron-right"></i></div>
+              <div class="swiper-button-prev"><i class="bi bi-chevron-left"></i></div>
+              <div class="swiper-pagination"></div>
             </div>
-            <div class="swiper-pagination"></div>
+          </div>
+
+          <div class="project-summary" data-aos="fade-up" data-aos-delay="180">
+            <div class="project-kicker">Creative Digital Asset</div>
+            <h1>${project.title}</h1>
+            <p class="project-short-description">${project.shortDescription}</p>
+
+            <div class="project-summary-meta">
+              <div class="meta-item">
+                <span class="meta-label">Category</span>
+                <strong>${project.category}</strong>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">${compatibilityLabel}</span>
+                <strong>${project.client}</strong>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Date</span>
+                <strong>${project.date}</strong>
+              </div>
+            </div>
+
+            <div class="project-actions">
+              ${renderDownloadButton(project)}
+              <a href="index.html#portfolio" class="secondary-action-btn">
+                <i class="bi bi-arrow-left"></i>
+                <span>Back to Projects</span>
+              </a>
+            </div>
+
+            <p class="project-trust-text">Ready for Photoshop, Photopea, and fast creative workflows.</p>
           </div>
         </div>
- 
-        <div class="col-lg-4">
-          <div class="portfolio-info" data-aos="fade-up" data-aos-delay="200">
-            <h3>Project information</h3>
-            <ul>
-              <li><strong>Category</strong>: ${project.category}</li>
-              <li><strong>Client</strong>: ${project.client}</li>
-              <li><strong>Project date</strong>: ${project.date}</li>
-              <li class="download-item">
-                <strong>Download</strong>:
-                ${renderDownloadButton(project)}
-              </li>
-            </ul>
-          </div>
- 
-          <div class="portfolio-description" data-aos="fade-up" data-aos-delay="300">
-            <h2>${project.title}</h2>
-            <p>${project.description}</p>
-          </div>
+
+        <div class="project-content-grid">
+          <article class="project-copy-panel">
+            <div class="detail-panel" data-aos="fade-up" data-aos-delay="220">
+              <h2>About this project</h2>
+              <p>${project.description}</p>
+            </div>
+
+            ${projectFeatures.length ? `
+              <div class="detail-panel" data-aos="fade-up" data-aos-delay="260">
+                <h3>What’s included</h3>
+                <ul class="project-feature-list">
+                  ${projectFeatures.map(feature => `
+                    <li><i class="bi bi-check-circle-fill"></i><span>${feature}</span></li>
+                  `).join('')}
+                </ul>
+              </div>
+            ` : ''}
+          </article>
+
+         
         </div>
+
+       
       </div>
     `;
- 
-    // نربطو الكليك بزر التحميل المقفول (إلا كان موجود) - بلا inline onclick
-    const lockedBtn = detailContainer.querySelector('.download-btn[data-locked="true"]');
-    if (lockedBtn) {
-      lockedBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        openLocker();
-      });
+
+    if (window.GLightbox) {
+      if (window.projectDetailLightbox) {
+        window.projectDetailLightbox.destroy();
+      }
+      window.projectDetailLightbox = GLightbox({ selector: '.project-lightbox' });
     }
+
+    bindLockedDownloadButtons(detailContainer);
   }
  
   /**
