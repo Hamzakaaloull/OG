@@ -31,9 +31,7 @@
     const unlocked = isUnlocked();
     const href = unlocked ? project.downloadUrl : '#';
     const target = unlocked ? ' target="_blank" rel="noopener noreferrer"' : '';
-    const btnClass = context === 'card'
-      ? 'project-action-btn download-btn download-btn--card glow-surface magnetic-btn'
-      : 'download-btn glow-surface magnetic-btn';
+    const btnClass = context === 'card' ? 'project-action-btn download-btn download-btn--card' : 'download-btn';
 
     return `
       <a href="${href}" class="${btnClass}" data-locked="${unlocked ? 'false' : 'true'}"${target}>
@@ -67,7 +65,7 @@
         'assets/img/portfolio/thmbnil1.jpg',
         'assets/img/portfolio/product-3.jpg'
       ],
-      downloadUrl: 'https://mega.nz/folder/jzwxjBZY#-1NSmiRucdTgCcKldK0q7Q',
+      downloadUrl: 'https://drive.google.com/file/d/18VGWNRGr9jJ1PZoDUIh_SqNLtNHYGLsL/view?usp=sharing',
       description: 'Download this high-quality PSD thumbnail template and customize it easily in Adobe Photoshop. The template is fully editable, allowing you to change the text, images, colors, and other design elements according to your needs. This PSD template is suitable for YouTube thumbnails, social media content, promotional designs, and other creative projects.',
       features: [
         'Editable PSD',
@@ -150,7 +148,7 @@
  
     grid.innerHTML = portfolioProjects.map(project => `
       <div class="col-lg-6 col-md-6 portfolio-item portfolio-card" data-category="${project.category}">
-        <div class="portfolio-card-inner glow-surface">
+        <div class="portfolio-card-inner">
           <div class="portfolio-content h-100">
             <img src="${project.image}" class="img-fluid" alt="${project.title}">
             <div class="portfolio-info">
@@ -311,7 +309,7 @@
 
             <div class="project-actions">
               ${renderDownloadButton(project)}
-              <a href="index.html#portfolio" class="secondary-action-btn glow-surface">
+              <a href="index.html#portfolio" class="secondary-action-btn">
                 <i class="bi bi-arrow-left"></i>
                 <span>Back to Projects</span>
               </a>
@@ -368,23 +366,6 @@
     headerToggleBtn.classList.toggle('bi-x');
   }
   headerToggleBtn.addEventListener('click', headerToggle);
-
-  /**
-   * Light / dark theme toggle
-   */
-  const themeToggleBtn = document.querySelector('#themeToggle');
-  if (themeToggleBtn) {
-    themeToggleBtn.addEventListener('click', function() {
-      const root = document.documentElement;
-      const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-      root.setAttribute('data-theme', next);
-      try {
-        localStorage.setItem('ryvle-theme', next);
-      } catch (e) {
-        // localStorage unavailable (private mode, etc.) — theme still applies for this session
-      }
-    });
-  }
  
   /**
    * Hide mobile nav on same-page/hash links
@@ -561,48 +542,5 @@
   }
   window.addEventListener('load', navmenuScrollspy);
   document.addEventListener('scroll', navmenuScrollspy);
-
-  /**
-   * Cursor-tracked glow on any .glow-surface element (cards, CTAs)
-   */
-  document.addEventListener('pointermove', (e) => {
-    const target = e.target.closest('.glow-surface');
-    if (!target) return;
-    const rect = target.getBoundingClientRect();
-    target.style.setProperty('--glow-x', `${e.clientX - rect.left}px`);
-    target.style.setProperty('--glow-y', `${e.clientY - rect.top}px`);
-  });
-
-  /**
-   * Magnetic pull for primary download CTAs (.magnetic-btn)
-   */
-  (function initMagneticButtons() {
-    const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!finePointer || reducedMotion) return;
-
-    document.addEventListener('mousemove', (e) => {
-      document.querySelectorAll('.magnetic-btn').forEach((btn) => {
-        const rect = btn.getBoundingClientRect();
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-        const dx = e.clientX - cx;
-        const dy = e.clientY - cy;
-        const distance = Math.hypot(dx, dy);
-        const radius = Math.max(rect.width, rect.height) * 1.4;
-
-        if (distance < radius) {
-          const pull = 1 - distance / radius;
-          btn.style.transform = `translate(${(dx * 0.25 * pull).toFixed(1)}px, ${(dy * 0.25 * pull).toFixed(1)}px)`;
-        } else {
-          btn.style.transform = '';
-        }
-      });
-    });
-
-    document.addEventListener('mouseleave', () => {
-      document.querySelectorAll('.magnetic-btn').forEach((btn) => { btn.style.transform = ''; });
-    });
-  })();
-
+ 
 })();

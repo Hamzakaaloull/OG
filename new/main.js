@@ -67,7 +67,7 @@
         'assets/img/portfolio/thmbnil1.jpg',
         'assets/img/portfolio/product-3.jpg'
       ],
-      downloadUrl: 'https://mega.nz/folder/jzwxjBZY#-1NSmiRucdTgCcKldK0q7Q',
+      downloadUrl: 'https://drive.google.com/file/d/18VGWNRGr9jJ1PZoDUIh_SqNLtNHYGLsL/view?usp=sharing',
       description: 'Download this high-quality PSD thumbnail template and customize it easily in Adobe Photoshop. The template is fully editable, allowing you to change the text, images, colors, and other design elements according to your needs. This PSD template is suitable for YouTube thumbnails, social media content, promotional designs, and other creative projects.',
       features: [
         'Editable PSD',
@@ -368,23 +368,6 @@
     headerToggleBtn.classList.toggle('bi-x');
   }
   headerToggleBtn.addEventListener('click', headerToggle);
-
-  /**
-   * Light / dark theme toggle
-   */
-  const themeToggleBtn = document.querySelector('#themeToggle');
-  if (themeToggleBtn) {
-    themeToggleBtn.addEventListener('click', function() {
-      const root = document.documentElement;
-      const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-      root.setAttribute('data-theme', next);
-      try {
-        localStorage.setItem('ryvle-theme', next);
-      } catch (e) {
-        // localStorage unavailable (private mode, etc.) — theme still applies for this session
-      }
-    });
-  }
  
   /**
    * Hide mobile nav on same-page/hash links
@@ -561,6 +544,55 @@
   }
   window.addEventListener('load', navmenuScrollspy);
   document.addEventListener('scroll', navmenuScrollspy);
+
+  /**
+   * Custom cursor — desktop pointer-fine devices only, respects reduced motion
+   */
+  function initCustomCursor() {
+    const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const dot = document.querySelector('.cursor-dot');
+    const ring = document.querySelector('.cursor-ring');
+    if (!finePointer || reducedMotion || !dot || !ring) return;
+
+    document.documentElement.classList.add('has-custom-cursor');
+
+    let ringX = window.innerWidth / 2;
+    let ringY = window.innerHeight / 2;
+    let targetX = ringX;
+    let targetY = ringY;
+
+    document.addEventListener('mousemove', (e) => {
+      targetX = e.clientX;
+      targetY = e.clientY;
+      dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`;
+    });
+
+    function animateRing() {
+      ringX += (targetX - ringX) * 0.18;
+      ringY += (targetY - ringY) * 0.18;
+      ring.style.transform = `translate(${ringX}px, ${ringY}px) translate(-50%, -50%)`;
+      requestAnimationFrame(animateRing);
+    }
+    requestAnimationFrame(animateRing);
+
+    const interactiveSelector = 'a, button, .download-btn, .secondary-action-btn, .project-action-btn, .portfolio-card-inner';
+    document.addEventListener('mouseover', (e) => {
+      if (e.target.closest(interactiveSelector)) ring.classList.add('is-active');
+    });
+    document.addEventListener('mouseout', (e) => {
+      if (e.target.closest(interactiveSelector)) ring.classList.remove('is-active');
+    });
+    document.addEventListener('mouseleave', () => {
+      dot.classList.add('is-hidden');
+      ring.classList.add('is-hidden');
+    });
+    document.addEventListener('mouseenter', () => {
+      dot.classList.remove('is-hidden');
+      ring.classList.remove('is-hidden');
+    });
+  }
+  initCustomCursor();
 
   /**
    * Cursor-tracked glow on any .glow-surface element (cards, CTAs)

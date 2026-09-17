@@ -2,17 +2,6 @@
 <html lang="en">
 
 <head>
-  <!-- Theme init: must run before CSS, avoids a flash of the wrong theme -->
-  <script>
-    (function () {
-      try {
-        var saved = localStorage.getItem('ryvle-theme');
-        var theme = saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-        document.documentElement.setAttribute('data-theme', theme);
-      } catch (e) {}
-    })();
-  </script>
-
   <!-- AdBlueMedia CPA Locker -->
   <script type="text/javascript">
       var XzFwX_VZm_XeEENc={"it":4630865,"key":"21363"};
@@ -55,29 +44,34 @@
 
 <body class="index-page">
 
+  <div class="cursor-dot"></div>
+  <div class="cursor-ring"></div>
+
   <header id="header" class="header dark-background d-flex flex-column">
     <i class="header-toggle d-xl-none bi bi-list"></i>
 
-    <a href="index.html" title="Ryvle"><img  class="logo-mark img-fluid" src="assets/img/logo.png" alt="Ryvles"></a>
+    <div class="profile-img">
+      <img src="assets/img/my-profile-img.jpg" alt="" class="img-fluid rounded-circle">
+    </div>
+
+    <a href="index.html" class="logo d-flex align-items-center justify-content-center">
+      <!-- Uncomment the line below if you also wish to use an image logo -->
+      <!-- <img src="assets/img/logo.png" alt=""> -->
+      <h1 class="sitename">Ryvle_03</h1>
+    </a>
+
+    <div class="social-links text-center">
+      <a href="https://www.facebook.com/aziy.andostylo.7/" class="facebook" target="_blank" rel="noopener noreferrer"><i class="bi bi-facebook"></i></a>
+      <a href="https://www.instagram.com/__hkl3" class="instagram" target="_blank" rel="noopener noreferrer"><i class="bi bi-instagram"></i></a>
+      <a href="https://www.youtube.com/@kaaloul_hamza" class="youtube" target="_blank" rel="noopener noreferrer"><i class="bi bi-youtube"></i></a>
+    </div>
 
     <nav id="navmenu" class="navmenu">
       <ul>
-        <li><a href="#hero" class="active" title="Home"><i class="bi bi-house navicon"></i><span class="nav-label">Home</span></a></li>
-        <li><a href="#portfolio" title="Projects"><i class="bi bi-images navicon"></i><span class="nav-label">Projects</span></a></li>
+        <li><a href="#hero" class="active"><i class="bi bi-house navicon"></i>Home</a></li>
+        <li><a href="#portfolio"><i class="bi bi-images navicon"></i> Projects</a></li>
       </ul>
     </nav>
-
-    <div class="rail-bottom">
-      <button id="themeToggle" class="theme-toggle" type="button" title="Switch theme" aria-label="Switch between light and dark theme">
-        <i class="bi bi-sun-fill theme-icon-light"></i>
-        <i class="bi bi-moon-stars-fill theme-icon-dark"></i>
-      </button>
-      <div class="social-links text-center">
-        <a href="https://www.facebook.com/aziy.andostylo.7/" class="facebook" target="_blank" rel="noopener noreferrer"><i class="bi bi-facebook"></i></a>
-        <a href="https://www.instagram.com/__hkl3" class="instagram" target="_blank" rel="noopener noreferrer"><i class="bi bi-instagram"></i></a>
-        <a href="https://www.youtube.com/@kaaloul_hamza" class="youtube" target="_blank" rel="noopener noreferrer"><i class="bi bi-youtube"></i></a>
-      </div>
-    </div>
 
   </header>
 
@@ -88,43 +82,48 @@
 
       <div class="container hero-inner">
         <div class="hero-copy" data-aos="fade-up" data-aos-delay="100">
-          <div class="hero-kicker"><span class="dotpulse"></span> Design resources, made to ship</div>
           <h2>Ryvle</h2>
           <p>I'm <span class="typed" data-typed-items="Designer, Developer, Freelancer, Photographer">Designer</span><span class="typed-cursor typed-cursor--blink" aria-hidden="true"></span><span class="typed-cursor typed-cursor--blink" aria-hidden="true"></span></p>
-          <p class="hero-tagline">PSD templates, layered asset packs, and creative kits — built for Photoshop and Photopea, ready to drop into your next thumbnail, post, or edit.</p>
-          <div class="hero-ctas">
-            <a href="#portfolio" class="btn-primary"><i class="bi bi-cloud-download"></i> Browse the packs</a>
-            <a href="https://www.youtube.com/@kaaloul_hamza" class="btn-ghost" target="_blank" rel="noopener noreferrer">Watch on YouTube</a>
-          </div>
         </div>
 
         <div class="hero-visual" aria-hidden="true" data-aos="zoom-in" data-aos-delay="180">
-          <div class="stack-stage">
-            <div class="layer layer-1">
-              <div class="layer-head"><span class="tag">.psd</span><span class="meta">Layers 12</span></div>
-              <div class="layer-body">
-                <div class="bar" style="width:70%"></div>
-                <div class="bar" style="width:45%"></div>
-                <div class="swatchrow">
-                  <span class="swatch swatch-1"></span>
-                  <span class="swatch swatch-2"></span>
-                  <span class="swatch swatch-3"></span>
+          <div class="visual-scene">
+            <div class="visual-orb orb-one"></div>
+            <div class="visual-orb orb-two"></div>
+            <div class="visual-panel visual-panel-main">
+              <div class="panel-header">
+                <span class="dot dot-red"></span>
+                <span class="dot dot-yellow"></span>
+                <span class="dot dot-green"></span>
+              </div>
+              <div class="panel-body">
+                <div class="panel-column panel-column-left">
+                  <span class="panel-block block-lg"></span>
+                  <span class="panel-block block-md"></span>
+                  <span class="panel-block block-sm"></span>
+                </div>
+                <div class="panel-column panel-column-right">
+                  <span class="panel-card card-strong"></span>
+                  <span class="panel-card card-soft"></span>
+                  <span class="panel-badge">PSD</span>
                 </div>
               </div>
             </div>
-            <div class="layer layer-2">
-              <div class="layer-head"><span class="tag">Assets</span><span class="meta">128 files</span></div>
-              <div class="layer-body">
-                <div class="bar" style="width:55%"></div>
-                <div class="bar" style="width:80%"></div>
-                <div class="bar" style="width:35%"></div>
+            <div class="visual-panel visual-panel-side">
+              <div class="mini-label">Resources</div>
+              <div class="mini-layers">
+                <span></span>
+                <span></span>
+                <span></span>
               </div>
             </div>
-            <div class="layer layer-3">
-              <div class="layer-head"><span class="tag">Preview</span></div>
+            <div class="floating-card floating-card-top">
+              <span class="floating-icon"><i class="bi bi-file-earmark-richtext"></i></span>
+              <strong>Creative Kit</strong>
             </div>
-            <div class="download-pill">
-              <i class="bi bi-cloud-download"></i> Ready to download
+            <div class="floating-card floating-card-bottom">
+              <span class="floating-icon"><i class="bi bi-cloud-download"></i></span>
+              <strong>Download</strong>
             </div>
           </div>
         </div>

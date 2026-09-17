@@ -2,17 +2,6 @@
 <html lang="en">
  
 <head>
-  <!-- Theme init: must run before CSS, avoids a flash of the wrong theme -->
-  <script>
-    (function () {
-      try {
-        var saved = localStorage.getItem('ryvle-theme');
-        var theme = saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-        document.documentElement.setAttribute('data-theme', theme);
-      } catch (e) {}
-    })();
-  </script>
-
   <!-- AdBlueMedia CPA Locker -->
   <script type="text/javascript">
       var XzFwX_VZm_XeEENc={"it":4630865,"key":"21363"};
@@ -54,30 +43,35 @@
 </head>
  
 <body class="portfolio-details-page">
+
+  <div class="cursor-dot"></div>
+  <div class="cursor-ring"></div>
  
   <header id="header" class="header dark-background d-flex flex-column">
     <i class="header-toggle d-xl-none bi bi-list"></i>
  
-    <a href="index.html" class="logo-mark" title="Ryvle">RY</a>
-
+    <div class="profile-img">
+      <img src="assets/img/my-profile-img.jpg" alt="" class="img-fluid rounded-circle">
+    </div>
+ 
+    <a href="index.html" class="logo d-flex align-items-center justify-content-center">
+      <!-- Uncomment the line below if you also wish to use an image logo -->
+      <!-- <img src="assets/img/logo.png" alt=""> -->
+      <h1 class="sitename">Ryvl</h1>
+    </a>
+ 
+    <div class="social-links text-center">
+      <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
+      <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
+      <a href="#" class="youtube"><i class="bi bi-youtube"></i></a>
+    </div>
+ 
     <nav id="navmenu" class="navmenu">
       <ul>
-        <li><a href="index.html#hero" title="Home"><i class="bi bi-house navicon"></i><span class="nav-label">Home</span></a></li>
-        <li><a href="index.html#portfolio" title="Projects"><i class="bi bi-images navicon"></i><span class="nav-label">Projects</span></a></li>
+        <li><a href="index.html#hero"><i class="bi bi-house navicon"></i>Home</a></li>
+        <li><a href="index.html#portfolio"><i class="bi bi-images navicon"></i> Portfolio</a></li>
       </ul>
     </nav>
-
-    <div class="rail-bottom">
-      <button id="themeToggle" class="theme-toggle" type="button" title="Switch theme" aria-label="Switch between light and dark theme">
-        <i class="bi bi-sun-fill theme-icon-light"></i>
-        <i class="bi bi-moon-stars-fill theme-icon-dark"></i>
-      </button>
-      <div class="social-links text-center">
-        <a href="https://www.facebook.com/aziy.andostylo.7/" class="facebook" target="_blank" rel="noopener noreferrer"><i class="bi bi-facebook"></i></a>
-        <a href="https://www.instagram.com/__hkl3" class="instagram" target="_blank" rel="noopener noreferrer"><i class="bi bi-instagram"></i></a>
-        <a href="https://www.youtube.com/@kaaloul_hamza" class="youtube" target="_blank" rel="noopener noreferrer"><i class="bi bi-youtube"></i></a>
-      </div>
-    </div>
  
   </header>
  
