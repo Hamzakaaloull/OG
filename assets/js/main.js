@@ -2,12 +2,20 @@
   "use strict";
 
   /**
-   * CPA Locker (AdBlueMedia) helpers — unchanged behavior from the original site
+   * OGAds Locker helpers.
+   * Locker ID 5n73n6 — script tag lives in the <head> of every page:
+   * <script id="ogjs" src="https://offertrk.org/cl/js/5n73n6"></script>
+   * That script exposes a global `og_load()` which opens the OGAds locker overlay.
+   * NOTE: OGAds lockers commonly redirect back to the original page with
+   * `?unlocked=1` once an offer is completed — checkLockerUnlock() below expects
+   * that. If your OGAds dashboard is configured with a different completion
+   * redirect/param, update this function and the URL you set in the OGAds panel
+   * to match.
    */
   function checkLockerUnlock() {
     const params = new URLSearchParams(window.location.search);
     if (params.get('unlocked') === '1') {
-      localStorage.setItem('cpa_unlocked', 'true');
+      localStorage.setItem('ogads_unlocked', 'true');
       params.delete('unlocked');
       const cleanUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
       window.history.replaceState({}, '', cleanUrl);
@@ -15,14 +23,14 @@
   }
 
   function isUnlocked() {
-    return localStorage.getItem('cpa_unlocked') === 'true';
+    return localStorage.getItem('ogads_unlocked') === 'true';
   }
 
   function openLocker() {
-    if (typeof _uj === 'function') {
+    if (typeof og_load === 'function') {
       og_load();
     } else {
-      console.warn('OGADS locker script not loaded yet. Try again in a moment.');
+      console.warn('OGAds locker script not loaded yet. Try again in a moment.');
     }
   }
 
@@ -52,6 +60,7 @@
       });
     });
   }
+
 
   /**
    * Project data.
