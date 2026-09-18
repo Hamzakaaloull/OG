@@ -1,32 +1,31 @@
 (function() {
   "use strict";
- 
+
   /**
-   * CPA Locker (AdBlueMedia) helpers
+   * CPA Locker (AdBlueMedia) helpers — unchanged behavior from the original site
    */
   function checkLockerUnlock() {
     const params = new URLSearchParams(window.location.search);
     if (params.get('unlocked') === '1') {
       localStorage.setItem('cpa_unlocked', 'true');
-      // نمسحو الباراميتر من الرابط باش ما يبقاش ظاهر
       params.delete('unlocked');
       const cleanUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
       window.history.replaceState({}, '', cleanUrl);
     }
   }
- 
+
   function isUnlocked() {
     return localStorage.getItem('cpa_unlocked') === 'true';
   }
- 
+
   function openLocker() {
     if (typeof _uj === 'function') {
-      _uj();
+      og_load();
     } else {
-      console.warn('AdBlueMedia locker script ma tحملش بعد. عاود جرب من بعد شوية.');
+      console.warn('OGADS locker script not loaded yet. Try again in a moment.');
     }
   }
- 
+
   function renderDownloadButton(project, context = 'detail') {
     const unlocked = isUnlocked();
     const href = unlocked ? project.downloadUrl : '#';
@@ -34,11 +33,13 @@
     const btnClass = context === 'card'
       ? 'project-action-btn download-btn download-btn--card glow-surface magnetic-btn'
       : 'download-btn glow-surface magnetic-btn';
+    const icon = unlocked ? 'bi-download' : 'bi-lock-fill';
+    const label = unlocked ? 'Download' : 'Unlock download';
 
     return `
       <a href="${href}" class="${btnClass}" data-locked="${unlocked ? 'false' : 'true'}"${target}>
-        <i class="bi bi-download"></i>
-        <span>Download</span>
+        <i class="bi ${icon}"></i>
+        <span>${label}</span>
       </a>
     `;
   }
@@ -51,7 +52,14 @@
       });
     });
   }
- 
+
+  /**
+   * Project data.
+   * NOTE for Hamza: `version` is a placeholder field on every project (defaults to "v1.0")
+   * so the cards have something real to show for "file information" — edit it per pack
+   * whenever you know the real version. Everything else (images, links, description,
+   * features) is kept exactly as it was in the old site.
+   */
   const portfolioProjects = [
     {
       id: 1,
@@ -61,13 +69,14 @@
       category: 'PSD Templates',
       client: 'PSD / Photoshop / Photopea',
       date: '01 March, 2026',
+      version: 'v1.0',
       image: 'assets/img/portfolio/product-3.jpg',
       gallery: [
         'assets/img/portfolio/product-2.jpg',
         'assets/img/portfolio/thmbnil1.jpg',
         'assets/img/portfolio/product-3.jpg'
       ],
-      downloadUrl: 'https://drive.google.com/file/d/18VGWNRGr9jJ1PZoDUIh_SqNLtNHYGLsL/view?usp=sharing',
+      downloadUrl: 'https://mega.nz/folder/jzwxjBZY#-1NSmiRucdTgCcKldK0q7Q',
       description: 'Download this high-quality PSD thumbnail template and customize it easily in Adobe Photoshop. The template is fully editable, allowing you to change the text, images, colors, and other design elements according to your needs. This PSD template is suitable for YouTube thumbnails, social media content, promotional designs, and other creative projects.',
       features: [
         'Editable PSD',
@@ -85,6 +94,7 @@
       category: 'Design Assets',
       client: 'PSD / Photoshop / Photopea',
       date: '14 September, 2026',
+      version: 'v1.0',
       image: 'assets/img/portfolio/project2/Project2Cover.jpg',
       gallery: [
         'assets/img/portfolio/project2/1.jpg',
@@ -98,7 +108,7 @@
         'assets/img/portfolio/project2/Paypal 2.png'
       ],
       downloadUrl: 'https://mega.nz/file/KvAnzaoa#eLiJNvHATBcolAJ4QIVDVTzlG2KqESQ3rUUBLlkG0yg',
-      description: 'The Ultimate Design Assets Pack is a versatile collection of creative resources designed to speed up your workflow and give your projects a more professional look.From realistic textures and paper elements to sparks, lasers, lens flares, backgrounds, UI graphics, and more, this pack gives you a wide variety of visual resources that can be used across graphic design, thumbnails, social media content, video editing, promotional designs, and creative projects. Whether you are creating a YouTube thumbnail, editing a video, designing social media content, or building a professional graphic composition, these assets can help you add depth, atmosphere, detail, and visual impact to your work.',
+      description: 'The Ultimate Design Assets Pack is a versatile collection of creative resources designed to speed up your workflow and give your projects a more professional look. From realistic textures and paper elements to sparks, lasers, lens flares, backgrounds, UI graphics, and more, this pack gives you a wide variety of visual resources that can be used across graphic design, thumbnails, social media content, video editing, promotional designs, and creative projects. Whether you are creating a YouTube thumbnail, editing a video, designing social media content, or building a professional graphic composition, these assets can help you add depth, atmosphere, detail, and visual impact to your work.',
       features: [
         'Material Textures',
         'Paper Textures & Elements',
@@ -108,7 +118,7 @@
       ]
     }
   ];
- 
+
   function slugify(value) {
     return value
       .toLowerCase()
@@ -116,25 +126,41 @@
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
   }
- 
+
+  /** Derives a short file-type badge (PSD / ZIP / ...) from the category text. */
+  function getFileType(project) {
+    const src = `${project.category} ${project.client}`.toLowerCase();
+    if (src.includes('psd')) return 'PSD';
+    if (src.includes('zip')) return 'ZIP';
+    if (src.includes('template')) return 'PSD';
+    return 'FILE';
+  }
+
+  function renderHeroStats() {
+    const packCount = document.querySelector('#stat-pack-count');
+    if (packCount) packCount.textContent = portfolioProjects.length;
+    const categoryCount = document.querySelector('#stat-category-count');
+    if (categoryCount) categoryCount.textContent = new Set(portfolioProjects.map(p => p.category)).size;
+  }
+
   function renderPortfolioFilters() {
     const filterList = document.querySelector('#portfolio-filters');
     if (!filterList) return;
- 
+
     const categories = [...new Set(portfolioProjects.map(project => project.category))];
- 
+
     filterList.innerHTML = `
-      <li><button type="button" class="filter-active" data-filter="all">All</button></li>
+      <li><button type="button" class="filter-active" data-filter="all">All packs</button></li>
       ${categories.map(category => `
         <li><button type="button" data-filter="${slugify(category)}">${category}</button></li>
       `).join('')}
     `;
- 
+
     filterList.querySelectorAll('button').forEach(button => {
       button.addEventListener('click', function() {
         filterList.querySelectorAll('button').forEach(item => item.classList.remove('filter-active'));
         this.classList.add('filter-active');
- 
+
         const selectedFilter = this.getAttribute('data-filter');
         document.querySelectorAll('.portfolio-card').forEach(card => {
           const matches = selectedFilter === 'all' || card.getAttribute('data-category') === this.textContent.trim();
@@ -143,49 +169,61 @@
       });
     });
   }
- 
+
   function renderPortfolioProjects() {
     const grid = document.querySelector('#portfolio-grid');
     if (!grid) return;
- 
+
     grid.innerHTML = portfolioProjects.map(project => `
       <div class="col-lg-6 col-md-6 portfolio-item portfolio-card" data-category="${project.category}">
         <div class="portfolio-card-inner glow-surface">
-          <div class="portfolio-content h-100">
-            <img src="${project.image}" class="img-fluid" alt="${project.title}">
+          <div class="portfolio-content">
+            <span class="category-badge">${project.category}</span>
+            <span class="filetype-badge">${getFileType(project)}</span>
+            <img src="${project.image}" class="img-fluid" alt="${project.title}" loading="lazy">
             <div class="portfolio-info">
               <h4>${project.shortTitle}</h4>
               <p>${project.shortDescription}</p>
-              <a href="${project.image}" title="${project.title}" data-gallery="portfolio-gallery-${project.id}" class="glightbox preview-link"><i class="bi bi-zoom-in"></i></a>
-              <a href="portfolio-details.html?id=${project.id}" title="More Details" class="details-link"><i class="bi bi-link-45deg"></i></a>
+              <a href="${project.image}" title="${project.title}" data-gallery="portfolio-gallery-${project.id}" class="glightbox preview-link" aria-label="Preview ${project.shortTitle}"><i class="bi bi-zoom-in"></i></a>
+              <a href="portfolio-details.html?id=${project.id}" title="More Details" class="details-link" aria-label="View details for ${project.shortTitle}"><i class="bi bi-link-45deg"></i></a>
+            </div>
+          </div>
+
+          <div class="portfolio-card-body">
+            <h4>${project.shortTitle}</h4>
+            <p>${project.shortDescription}</p>
+            <div class="card-meta-row">
+              <span class="card-meta-item"><i class="bi bi-tag"></i>${project.version}</span>
+              <span class="card-meta-item"><i class="bi bi-calendar3"></i>${project.date}</span>
+              <span class="card-meta-item"><i class="bi bi-layers"></i>${project.client}</span>
             </div>
           </div>
 
           <div class="portfolio-card-actions">
             <a href="portfolio-details.html?id=${project.id}" class="project-action-btn project-action-btn--secondary">
               <i class="bi bi-eye"></i>
-              <span>Show Details</span>
+              <span>Show details</span>
             </a>
             ${renderDownloadButton(project, 'card')}
           </div>
         </div>
       </div>
     `).join('');
- 
+
     bindLockedDownloadButtons(grid);
- 
+
     if (window.GLightbox) {
       if (window.portfolioLightbox) {
         window.portfolioLightbox.destroy();
       }
       window.portfolioLightbox = GLightbox({ selector: '.glightbox' });
     }
- 
+
     if (window.AOS) {
       window.AOS.refreshHard();
     }
   }
- 
+
   function getProjectFeatures(project) {
     if (Array.isArray(project.features) && project.features.length) {
       return project.features;
@@ -230,12 +268,12 @@
   function renderProjectDetails() {
     const detailContainer = document.querySelector('#project-details-content');
     if (!detailContainer) return;
- 
+
     const params = new URLSearchParams(window.location.search);
     const projectId = Number(params.get('id')) || portfolioProjects[0].id;
     const project = portfolioProjects.find(item => item.id === projectId) || portfolioProjects[0];
     const projectFeatures = getProjectFeatures(project);
-    const compatibilityLabel = /photoshop|photopea|figma|canva|illustrator/i.test(project.client || '') ? 'Compatible With' : 'Client';
+    const compatibilityLabel = /photoshop|photopea|figma|canva|illustrator/i.test(project.client || '') ? 'Compatible with' : 'Client';
 
     document.title = `${project.title} | RYVL`;
 
@@ -246,7 +284,7 @@
           <span class="breadcrumb-separator">/</span>
           <a href="index.html#portfolio">Projects</a>
           <span class="breadcrumb-separator">/</span>
-          <span>${project.title}</span>
+          <span>${project.shortTitle}</span>
         </nav>
 
         <div class="project-showcase">
@@ -256,20 +294,11 @@
                 {
                   "loop": true,
                   "speed": 700,
-                  "autoplay": {
-                    "delay": 5000
-                  },
+                  "autoplay": { "delay": 5000 },
                   "slidesPerView": 1,
                   "spaceBetween": 18,
-                  "pagination": {
-                    "el": ".swiper-pagination",
-                    "type": "bullets",
-                    "clickable": true
-                  },
-                  "navigation": {
-                    "nextEl": ".swiper-button-next",
-                    "prevEl": ".swiper-button-prev"
-                  }
+                  "pagination": { "el": ".swiper-pagination", "type": "bullets", "clickable": true },
+                  "navigation": { "nextEl": ".swiper-button-next", "prevEl": ".swiper-button-prev" }
                 }
               </script>
 
@@ -290,21 +319,21 @@
           </div>
 
           <div class="project-summary" data-aos="fade-up" data-aos-delay="180">
-            <div class="project-kicker">Creative Digital Asset</div>
+            <span class="project-category-badge"><i class="bi bi-folder2"></i>${project.category}</span>
             <h1>${project.title}</h1>
             <p class="project-short-description">${project.shortDescription}</p>
 
             <div class="project-summary-meta">
               <div class="meta-item">
-                <span class="meta-label">Category</span>
-                <strong>${project.category}</strong>
+                <span class="meta-label">Version</span>
+                <strong>${project.version}</strong>
               </div>
               <div class="meta-item">
                 <span class="meta-label">${compatibilityLabel}</span>
                 <strong>${project.client}</strong>
               </div>
               <div class="meta-item">
-                <span class="meta-label">Date</span>
+                <span class="meta-label">Updated</span>
                 <strong>${project.date}</strong>
               </div>
             </div>
@@ -313,7 +342,7 @@
               ${renderDownloadButton(project)}
               <a href="index.html#portfolio" class="secondary-action-btn glow-surface">
                 <i class="bi bi-arrow-left"></i>
-                <span>Back to Projects</span>
+                <span>Back to projects</span>
               </a>
             </div>
 
@@ -324,13 +353,13 @@
         <div class="project-content-grid">
           <article class="project-copy-panel">
             <div class="detail-panel" data-aos="fade-up" data-aos-delay="220">
-              <h2>About this project</h2>
+              <h2>About this pack</h2>
               <p>${project.description}</p>
             </div>
 
             ${projectFeatures.length ? `
               <div class="detail-panel" data-aos="fade-up" data-aos-delay="260">
-                <h3>What’s included</h3>
+                <h3>What's included</h3>
                 <ul class="project-feature-list">
                   ${projectFeatures.map(feature => `
                     <li><i class="bi bi-check-circle-fill"></i><span>${feature}</span></li>
@@ -339,11 +368,7 @@
               </div>
             ` : ''}
           </article>
-
-         
         </div>
-
-       
       </div>
     `;
 
@@ -356,19 +381,36 @@
 
     bindLockedDownloadButtons(detailContainer);
   }
- 
+
   /**
-   * Header toggle
+   * Header toggle (mobile dock -> overlay menu)
    */
   const headerToggleBtn = document.querySelector('.header-toggle');
- 
+
   function headerToggle() {
     document.querySelector('#header').classList.toggle('header-show');
     headerToggleBtn.classList.toggle('bi-list');
     headerToggleBtn.classList.toggle('bi-x');
   }
-  headerToggleBtn.addEventListener('click', headerToggle);
- 
+  if (headerToggleBtn) headerToggleBtn.addEventListener('click', headerToggle);
+
+  /**
+   * Light / dark theme toggle
+   */
+  const themeToggleBtn = document.querySelector('#themeToggle');
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', function() {
+      const root = document.documentElement;
+      const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      root.setAttribute('data-theme', next);
+      try {
+        localStorage.setItem('ryvle-theme', next);
+      } catch (e) {
+        // localStorage unavailable (private mode, etc.) — theme still applies for this session
+      }
+    });
+  }
+
   /**
    * Hide mobile nav on same-page/hash links
    */
@@ -378,21 +420,8 @@
         headerToggle();
       }
     });
- 
   });
- 
-  /**
-   * Toggle mobile nav dropdowns
-   */
-  document.querySelectorAll('.navmenu .toggle-dropdown').forEach(navmenu => {
-    navmenu.addEventListener('click', function(e) {
-      e.preventDefault();
-      this.parentNode.classList.toggle('active');
-      this.parentNode.nextElementSibling.classList.toggle('dropdown-active');
-      e.stopImmediatePropagation();
-    });
-  });
- 
+
   /**
    * Preloader
    */
@@ -402,90 +431,66 @@
       preloader.remove();
     });
   }
- 
+
   /**
    * Scroll top button
    */
   let scrollTop = document.querySelector('.scroll-top');
- 
+
   function toggleScrollTop() {
     if (scrollTop) {
       window.scrollY > 100 ? scrollTop.classList.add('active') : scrollTop.classList.remove('active');
     }
   }
-  scrollTop.addEventListener('click', (e) => {
-    e.preventDefault();
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  });
- 
-  window.addEventListener('load', toggleScrollTop);
-  document.addEventListener('scroll', toggleScrollTop);
- 
-  /**
-   * Animation on scroll function and init
-   */
-  function aosInit() {
-    AOS.init({
-      duration: 600,
-      easing: 'ease-in-out',
-      once: true,
-      mirror: false
+  if (scrollTop) {
+    scrollTop.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   }
-  window.addEventListener('load', aosInit);
- 
+
+  window.addEventListener('load', toggleScrollTop);
+  document.addEventListener('scroll', toggleScrollTop);
+
   /**
-   * Init typed.js
+   * Animation on scroll — single reveal on section containers only (not per-card)
+   */
+  function aosInit() {
+    if (window.AOS) {
+      AOS.init({ duration: 600, easing: 'ease-in-out', once: true, mirror: false });
+    }
+  }
+  window.addEventListener('load', aosInit);
+
+  /**
+   * Typed.js — rotating product types in the hero
    */
   const selectTyped = document.querySelector('.typed');
-  if (selectTyped) {
+  if (selectTyped && window.Typed) {
     let typed_strings = selectTyped.getAttribute('data-typed-items');
     typed_strings = typed_strings.split(',');
     new Typed('.typed', {
       strings: typed_strings,
       loop: true,
-      typeSpeed: 100,
-      backSpeed: 50,
-      backDelay: 2000
+      typeSpeed: 55,
+      backSpeed: 30,
+      backDelay: 2200
     });
   }
- 
+
   /**
-   * Initiate Pure Counter
+   * Initiate glightbox (base instance for any static .glightbox links outside the grid)
    */
-  new PureCounter();
- 
-  /**
-   * Animate the skills items on reveal
-   */
-  let skillsAnimation = document.querySelectorAll('.skills-animation');
-  skillsAnimation.forEach((item) => {
-    new Waypoint({
-      element: item,
-      offset: '80%',
-      handler: function(direction) {
-        let progress = item.querySelectorAll('.progress .progress-bar');
-        progress.forEach(el => {
-          el.style.width = el.getAttribute('aria-valuenow') + '%';
-        });
-      }
-    });
-  });
- 
-  /**
-   * Initiate glightbox
-   */
-  const glightbox = GLightbox({
-    selector: '.glightbox'
-  });
- 
+  if (window.GLightbox) {
+    GLightbox({ selector: '.glightbox' });
+  }
+
   checkLockerUnlock();
+  renderHeroStats();
+  renderPortfolioFilters();
   renderPortfolioProjects();
   renderProjectDetails();
- 
+
   /**
    * Init swiper sliders
    */
@@ -494,40 +499,31 @@
       let config = JSON.parse(
         swiperElement.querySelector(".swiper-config").innerHTML.trim()
       );
- 
-      if (swiperElement.classList.contains("swiper-tab")) {
-        initSwiperWithCustomPagination(swiperElement, config);
-      } else {
-        new Swiper(swiperElement, config);
-      }
+      new Swiper(swiperElement, config);
     });
   }
- 
-  window.addEventListener("load", initSwiper);
- 
+  if (window.Swiper) window.addEventListener("load", initSwiper);
+
   /**
    * Correct scrolling position upon page load for URLs containing hash links.
    */
-  window.addEventListener('load', function(e) {
+  window.addEventListener('load', function() {
     if (window.location.hash) {
-      if (document.querySelector(window.location.hash)) {
+      const section = document.querySelector(window.location.hash);
+      if (section) {
         setTimeout(() => {
-          let section = document.querySelector(window.location.hash);
           let scrollMarginTop = getComputedStyle(section).scrollMarginTop;
-          window.scrollTo({
-            top: section.offsetTop - parseInt(scrollMarginTop),
-            behavior: 'smooth'
-          });
+          window.scrollTo({ top: section.offsetTop - parseInt(scrollMarginTop || 0), behavior: 'smooth' });
         }, 100);
       }
     }
   });
- 
+
   /**
    * Navmenu Scrollspy
    */
   let navmenulinks = document.querySelectorAll('.navmenu a');
- 
+
   function navmenuScrollspy() {
     navmenulinks.forEach(navmenulink => {
       if (!navmenulink.hash) return;
@@ -540,59 +536,10 @@
       } else {
         navmenulink.classList.remove('active');
       }
-    })
+    });
   }
   window.addEventListener('load', navmenuScrollspy);
   document.addEventListener('scroll', navmenuScrollspy);
-
-  /**
-   * Custom cursor — desktop pointer-fine devices only, respects reduced motion
-   */
-  function initCustomCursor() {
-    const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const dot = document.querySelector('.cursor-dot');
-    const ring = document.querySelector('.cursor-ring');
-    if (!finePointer || reducedMotion || !dot || !ring) return;
-
-    document.documentElement.classList.add('has-custom-cursor');
-
-    let ringX = window.innerWidth / 2;
-    let ringY = window.innerHeight / 2;
-    let targetX = ringX;
-    let targetY = ringY;
-
-    document.addEventListener('mousemove', (e) => {
-      targetX = e.clientX;
-      targetY = e.clientY;
-      dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`;
-    });
-
-    function animateRing() {
-      ringX += (targetX - ringX) * 0.18;
-      ringY += (targetY - ringY) * 0.18;
-      ring.style.transform = `translate(${ringX}px, ${ringY}px) translate(-50%, -50%)`;
-      requestAnimationFrame(animateRing);
-    }
-    requestAnimationFrame(animateRing);
-
-    const interactiveSelector = 'a, button, .download-btn, .secondary-action-btn, .project-action-btn, .portfolio-card-inner';
-    document.addEventListener('mouseover', (e) => {
-      if (e.target.closest(interactiveSelector)) ring.classList.add('is-active');
-    });
-    document.addEventListener('mouseout', (e) => {
-      if (e.target.closest(interactiveSelector)) ring.classList.remove('is-active');
-    });
-    document.addEventListener('mouseleave', () => {
-      dot.classList.add('is-hidden');
-      ring.classList.add('is-hidden');
-    });
-    document.addEventListener('mouseenter', () => {
-      dot.classList.remove('is-hidden');
-      ring.classList.remove('is-hidden');
-    });
-  }
-  initCustomCursor();
 
   /**
    * Cursor-tracked glow on any .glow-surface element (cards, CTAs)
